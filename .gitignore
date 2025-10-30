@@ -18,6 +18,7 @@ temp/
 temp_outputs/
 results/
 out/
+imagens/
 *.tmp
 *.log
 
@@ -53,6 +54,7 @@ huggingface/
 *.csv
 *.xlsx
 *.pdf
+*.jpg
 
 # ▪️ LOGS DO SERVIDOR / UVICORN
 *.log
