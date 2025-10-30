@@ -8,4 +8,4 @@
 ## Captura de dependencias - estado atual
 ```
 - pip freeze > requirements_freeze.txt
-´´´
+```
