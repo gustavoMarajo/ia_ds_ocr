@@ -1,6 +1,9 @@
 ## INSTRUÇÕES DE USO
 
-## 🔹Inicialização
+## 🔹Dependencias
+Instalar os packages e seguir instruções de uso em "requiriments.txt"
+
+## 🔹Inicialização do serviço - API
 ```
 - uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1 
 ```
