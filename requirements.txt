@@ -54,17 +54,3 @@ certifi==2025.10.5
 typer-slim==0.20.0
 shellingham==1.5.4
 
-# ===============================
-# 🔹 NOTAS DE INSTALAÇÃO
-# ===============================
-# Se estiver usando GPU com CUDA 11.8:
-#     pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu118
-#
-# Se estiver usando apenas CPU:
-#     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-#     pip install -r requirements.txt
-#
-# Este arquivo é otimizado para:
-# - Python 3.10+ (Windows 11)
-# - DeepSeek-OCR (via transformers, trust_remote_code=True)
-# - Execução em API FastAPI com suporte a uploads e OCR em GPU ou CPU.
