@@ -34,7 +34,7 @@ def load_image(image_path):
         return corrected_image
         
     except Exception as e:
-        print(f"error: {e}")
+        # print(f"error: {e}")
         try:
             return Image.open(image_path)
         except:
@@ -64,7 +64,7 @@ def extract_coordinates_and_label(ref_text, image_width, image_height):
         label_type = ref_text[1]
         cor_list = eval(ref_text[2])
     except Exception as e:
-        print(e)
+        # print(e)
         return None
 
     return (label_type, cor_list)
@@ -112,7 +112,7 @@ def draw_bounding_boxes(image, refs, ouput_path):
                             cropped = image.crop((x1, y1, x2, y2))
                             cropped.save(f"{ouput_path}/images/{img_idx}.jpg")
                         except Exception as e:
-                            print(e)
+                            # print(e)
                             pass
                         img_idx += 1
                         
@@ -345,7 +345,7 @@ class NoEOSTextStreamer(TextStreamer):
 
         eos_text = self.tokenizer.decode([self.tokenizer.eos_token_id], skip_special_tokens=False)
         text = text.replace(eos_text, "\n")
-        print(text, flush=True, end="")
+        # print(text, flush=True, end="")
 
 
 class DeepseekOCRConfig(DeepseekV2Config):
@@ -432,10 +432,10 @@ class DeepseekOCRModel(DeepseekV2Model):
                         global_features = torch.cat((global_features_2[:, 1:], global_features_1.flatten(2).permute(0, 2, 1)), dim=-1) 
                         global_features = self.projector(global_features)
 
-                        print('=====================')
-                        print('BASE: ', global_features.shape)
-                        print('PATCHES: ', local_features.shape)
-                        print('=====================')
+                        # print('=====================')
+                        # print('BASE: ', global_features.shape)
+                        # print('PATCHES: ', local_features.shape)
+                        # print('=====================')
 
                         _, hw, n_dim = global_features.shape
                         h = w = int(hw ** 0.5)
@@ -475,10 +475,10 @@ class DeepseekOCRModel(DeepseekV2Model):
                         global_features_2 = vision_model(image_ori, global_features_1) 
                         global_features = torch.cat((global_features_2[:, 1:], global_features_1.flatten(2).permute(0, 2, 1)), dim=-1) 
                         global_features = self.projector(global_features)
-                        print('=====================')
-                        print('BASE: ', global_features.shape)
-                        print('NO PATCHES')
-                        print('=====================')
+                        # print('=====================')
+                        # print('BASE: ', global_features.shape)
+                        # print('NO PATCHES')
+                        # print('=====================')
                         _, hw, n_dim = global_features.shape
                         h = w = int(hw ** 0.5)
 
@@ -841,7 +841,7 @@ class DeepseekOCRForCausalLM(DeepseekV2ForCausalLM):
 
                 """process the global view"""
                 if image_size <= 640:
-                    print('directly resize')
+                    # print('directly resize')
                     image = image.resize((image_size, image_size))
                 # else:
                 global_view = ImageOps.pad(image, (image_size, image_size),
@@ -959,19 +959,19 @@ class DeepseekOCRForCausalLM(DeepseekV2ForCausalLM):
         if '<image>' in conversation[0]['content'] and test_compress:
             outputs = tokenizer.decode(output_ids[0, input_ids.unsqueeze(0).cuda().shape[1]:])
             pure_texts_outputs_token_length = len(text_encode(tokenizer, outputs, bos=False, eos=False))
-            print('='*50)
-            print('image size: ', (w, h))
-            print('valid image tokens: ', int(valid_img_tokens))
-            print('output texts tokens (valid): ', pure_texts_outputs_token_length)
-            print('compression ratio: ', round(pure_texts_outputs_token_length/valid_img_tokens, 2))
-            print('='*50)
+            # print('='*50)
+            # print('image size: ', (w, h))
+            # print('valid image tokens: ', int(valid_img_tokens))
+            # print('output texts tokens (valid): ', pure_texts_outputs_token_length)
+            # print('compression ratio: ', round(pure_texts_outputs_token_length/valid_img_tokens, 2))
+            # print('='*50)
 
 
         if '<image>' in conversation[0]['content'] and save_results:
             outputs = tokenizer.decode(output_ids[0, input_ids.unsqueeze(0).cuda().shape[1]:])
             stop_str = '<｜end▁of▁sentence｜>'
 
-            print('='*15 + 'save results:' + '='*15)
+            # print('='*15 + 'save results:' + '='*15)
             
             # # # # conv.messages[-1][-1] = outputs
             if outputs.endswith(stop_str):

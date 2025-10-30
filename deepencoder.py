@@ -461,7 +461,7 @@ class VitModel(nn.Module):
         self.transformer = NoTPTransformer(cfg=cfg)
 
         if cfg.get("fp32norm", False):
-            logger.info("Load fp32 layernorm for ViT.")
+            # logger.info("Load fp32 layernorm for ViT.")
             self.pre_layrnorm = LayerNormfp32(
                 cfg.hidden_size,
                 eps=cfg.get("pre_layernorm_epsilon", 1e-5),
@@ -1054,5 +1054,5 @@ def _build_sam(
         # image_encoder.load_state_dict(state_dict, strict=True)
         # tob
         image_encoder.load_state_dict({k[30:]: v for k, v in state_dict.items() if 'vision_tower_high' in k}, strict=True)
-        print(checkpoint)
+        # print(checkpoint)
     return image_encoder

@@ -259,7 +259,7 @@ register_conv_template(
 
 
 if __name__ == "__main__":
-    print("deepseek template:")
+    # print("deepseek template:")
     conv = get_conv_template("deepseek")
     conv.append_message(conv.roles[0], "Hello!")
     conv.append_message(conv.roles[1], "Hi! This is Tony.")
@@ -267,9 +267,9 @@ if __name__ == "__main__":
     conv.append_message(conv.roles[1], "I am a helpful assistant.")
     conv.append_message(conv.roles[0], "How are you?")
     conv.append_message(conv.roles[1], None)
-    print(conv.get_prompt())
+    # print(conv.get_prompt())
 
-    print("deepseekv2 template:")
+    # print("deepseekv2 template:")
     conv = get_conv_template("deepseekv2")
     conv.append_message(conv.roles[0], "Hello!")
     conv.append_message(conv.roles[1], "Hi! This is Tony.")
@@ -277,4 +277,4 @@ if __name__ == "__main__":
     conv.append_message(conv.roles[1], "I am a helpful assistant.")
     conv.append_message(conv.roles[0], "How are you?")
     conv.append_message(conv.roles[1], None)
-    print(conv.get_prompt())
+    # print(conv.get_prompt())
