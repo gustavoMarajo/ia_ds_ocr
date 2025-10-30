@@ -1,0 +1,59 @@
+# =========================================
+# 🧠 GITIGNORE PARA PROJETO PYTHON / FASTAPI / DEEPSEEK OCR
+# =========================================
+
+# ▪️ AMBIENTE VIRTUAL
+venv/
+.env/
+.env.bak/
+.venv/
+
+# ▪️ CACHE E COMPILAÇÃO
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ▪️ TEMPORÁRIOS DO OCR
+temp/
+temp_outputs/
+results/
+out/
+*.tmp
+*.log
+
+# ▪️ CONFIGURAÇÕES DE IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ▪️ SISTEMA OPERACIONAL
+.DS_Store
+Thumbs.db
+
+# ▪️ ARQUIVOS DE BUILD E PACOTES
+build/
+dist/
+*.egg-info/
+*.egg
+
+# ▪️ MODELOS BAIXADOS AUTOMATICAMENTE
+*.bin
+*.safetensors
+*.pth
+*.ckpt
+huggingface/
+
+# ▪️ ARQUIVOS DE BACKUP
+*~
+*.bak
+*.old
+
+# ▪️ EXPORTS E RELATÓRIOS
+*.csv
+*.xlsx
+*.pdf
+
+# ▪️ LOGS DO SERVIDOR / UVICORN
+*.log
+logs/

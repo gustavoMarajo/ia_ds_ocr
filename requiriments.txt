@@ -1,0 +1,70 @@
+# ===============================
+# 🔹 CORE - DEEPSEEK OCR STACK
+# ===============================
+torch==2.7.1+cu118
+torchvision==0.22.1+cu118
+torchaudio==2.7.1+cu118
+transformers==4.46.3
+accelerate==1.11.0
+huggingface-hub==0.26.3
+tokenizers==0.20.3
+safetensors==0.6.2
+einops==0.8.1
+addict==2.4.0
+easydict==1.13
+tqdm==4.67.1
+numpy==2.2.6
+psutil==7.1.2
+requests==2.32.5
+PyYAML==6.0.3
+
+# ===============================
+# 🔹 API E SERVIDOR
+# ===============================
+fastapi==0.120.2
+starlette==0.49.1
+uvicorn==0.38.0
+python-multipart==0.0.20
+typing_extensions==4.15.0
+
+# ===============================
+# 🔹 VISUALIZAÇÃO / UTILITÁRIOS
+# ===============================
+pillow==12.0.0
+matplotlib==3.10.7
+
+# ===============================
+# 🔹 DEPENDÊNCIAS DE SUPORTE
+# ===============================
+anyio==4.11.0
+httpx==0.28.1
+httpcore==1.0.9
+sniffio==1.3.1
+colorama==0.4.6
+regex==2025.10.23
+packaging==25.0
+filelock==3.20.0
+idna==3.11
+urllib3==2.5.0
+certifi==2025.10.5
+
+# ===============================
+# 🔹 OPCIONAL (CLI e logs)
+# ===============================
+typer-slim==0.20.0
+shellingham==1.5.4
+
+# ===============================
+# 🔹 NOTAS DE INSTALAÇÃO
+# ===============================
+# Se estiver usando GPU com CUDA 11.8:
+#     pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu118
+#
+# Se estiver usando apenas CPU:
+#     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+#     pip install -r requirements.txt
+#
+# Este arquivo é otimizado para:
+# - Python 3.10+ (Windows 11)
+# - DeepSeek-OCR (via transformers, trust_remote_code=True)
+# - Execução em API FastAPI com suporte a uploads e OCR em GPU ou CPU.
