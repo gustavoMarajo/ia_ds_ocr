@@ -1,7 +1,7 @@
 ## INSTRUÇÕES DE USO
 
 ## 🔹Dependencias
-Instalar os packages e seguir instruções de uso em "requiriments.txt"
+Instalar os packages e seguir instruções de uso em "requirements.txt"
 
 ## 🔹Inicialização do serviço - API
 ```
