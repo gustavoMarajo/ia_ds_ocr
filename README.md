@@ -15,6 +15,8 @@ Instalar os packages e seguir instruções de uso em "requiriments.txt"
 
 ## 🔹Modelo IA
 O modelo DeepSeek-OCR é baixado automaticamente na primeira execução
+##
+
 Se estiver usando GPU com CUDA 11.8:
 ```
 - pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu118
