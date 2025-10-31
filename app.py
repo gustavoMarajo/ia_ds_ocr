@@ -6,7 +6,8 @@ from PIL import Image
 from uuid import uuid4
 from glob import glob
 from contextlib import redirect_stdout, redirect_stderr
-import torch, io, warnings, logging, os, asyncio, shutil, time, sqlite3, numpy as np, json, sys
+import torch, io, warnings, logging, os, asyncio, shutil, time, sqlite3, numpy as np, json, sys, importlib, builtins, types, sys
+
 
 # ---------------------------------------------------------------------
 # SUPRESSÃO DE WARNINGS E LOGS
@@ -22,17 +23,38 @@ MODEL_NAME = "deepseek-ai/DeepSeek-OCR"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BASE_TEMP_DIR = "./temp_outputs"
 DB_PATH = "./document_types.db"
+DEVNULL = open(os.devnull, "w", encoding="utf-8", buffering=1)
 
 os.makedirs(BASE_TEMP_DIR, exist_ok=True)
 os.environ["PYTHONIOENCODING"] = "utf-8"
-devnull = open(os.devnull, "w", encoding="utf-8", buffering=1)
-sys.stdout = devnull
-sys.stderr = devnull
+sys.stdout = DEVNULL
+sys.stderr = DEVNULL
 
 
 print("Carregando modelo na inicialização...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
 model = AutoModel.from_pretrained(MODEL_NAME, trust_remote_code=True, use_safetensors=True)
+
+_builtin_print = builtins.print
+
+def safe_print(*args, **kwargs):
+    """Print seguro que ignora stdout fechado."""
+    try:
+        _builtin_print(*args, **kwargs)
+    except (ValueError, OSError):
+        pass
+
+# Substitui print global
+builtins.print = safe_print
+
+# Se o modelo DeepSeek-OCR tiver referência local ao print (interno), substitui também
+for name, module in sys.modules.items():
+    if name and "deepseek" in name.lower() and hasattr(module, "__dict__"):
+        if "print" in module.__dict__:
+            module.__dict__["print"] = safe_print
+
+
+
 model = model.eval().to(torch.bfloat16 if DEVICE == "cuda" else torch.float32).to(DEVICE)
 
 app = FastAPI(title="DeepSeek-OCR API", version="1.0")
@@ -59,18 +81,18 @@ def run_ocr(image_bytes: bytes) -> str:
     prompt = "<image>\nFree OCR."
 
     # redireciona stdout/stderr para evitar logs do modelo
-    with open(os.devnull, "w") as devnull, redirect_stdout(devnull), redirect_stderr(devnull):
-        _ = model.infer(
-            tokenizer,
-            prompt=prompt,
-            image_file=img_path,
-            output_path=out_dir,
-            base_size=1024,
-            image_size=640,
-            crop_mode=True,
-            save_results=True,
-            test_compress=True
-        )
+    # with open(os.devnull, "w") as devnull, redirect_stdout(devnull), redirect_stderr(devnull):
+    _ = model.infer(
+        tokenizer,
+        prompt=prompt,
+        image_file=img_path,
+        output_path=out_dir,
+        base_size=1024,
+        image_size=640,
+        crop_mode=True,
+        save_results=True,
+        test_compress=True
+    )
 
     txts = sorted(glob(os.path.join(out_dir, "**", "*.mmd"), recursive=True), key=os.path.getmtime, reverse=True)
     if not txts:
@@ -157,6 +179,7 @@ def extract_image_embedding(image_bytes: bytes) -> np.ndarray:
 @app.post("/ocr")
 async def ocr_endpoint(file: UploadFile = File(...)):
     image_bytes = await file.read()
+    # async with ocr_lock:
     loop = asyncio.get_running_loop()
     text = await loop.run_in_executor(executor, run_ocr, image_bytes)
     return {"filename": file.filename, "text": text}

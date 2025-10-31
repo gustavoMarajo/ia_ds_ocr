@@ -27,6 +27,12 @@ Se estiver usando apenas CPU:
 - pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 ```
 
+## Container - Docker(GPU)
+Para levantar a imagem da API com o container docker executando em GPU:
+```powershell
+- docker run -d -p 8000:8000 --gpus all --name api_gpu ai_dp_ocr
+```
+
 ## 🔹Projeto
 - Python 3.10+ (Windows 11)
 - DeepSeek-OCR (via transformers, trust_remote_code=True)
