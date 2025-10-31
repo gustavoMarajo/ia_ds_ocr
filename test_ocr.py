@@ -24,7 +24,7 @@ MODEL_NAME = "deepseek-ai/DeepSeek-OCR"
 # ---------------------------------------------------------------------
 # CARREGAR MODELO E TOKENIZER
 # ---------------------------------------------------------------------
-print("🔹 Carregando modelo...")
+print("Carregando modelo...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
 model = AutoModel.from_pretrained(
     MODEL_NAME,
@@ -46,7 +46,7 @@ os.makedirs(output_path, exist_ok=True)
 # ---------------------------------------------------------------------
 # EXECUTAR OCR (usando método customizado do DeepSeek)
 # ---------------------------------------------------------------------
-print("🔹 Rodando inferência...")
+print("Rodando inferência...")
 res = model.infer(
     tokenizer,
     prompt=prompt,
@@ -59,5 +59,5 @@ res = model.infer(
     test_compress=True     # usa o modo de compressão contextual
 )
 
-print("\n✅ OCR finalizado!")
-print("🧾 Resultado salvo em:", output_path)
+print("OCR finalizado!")
+print("Resultado salvo em:", output_path)

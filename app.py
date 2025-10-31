@@ -29,7 +29,7 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 sys.stdout.reconfigure(encoding='utf-8')
 sys.stderr.reconfigure(encoding='utf-8')
 
-print("🔹 Carregando modelo na inicialização...")
+print("Carregando modelo na inicialização...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
 model = AutoModel.from_pretrained(MODEL_NAME, trust_remote_code=True, use_safetensors=True)
 model = model.eval().to(torch.bfloat16 if DEVICE == "cuda" else torch.float32).to(DEVICE)
@@ -37,7 +37,7 @@ model = model.eval().to(torch.bfloat16 if DEVICE == "cuda" else torch.float32).t
 app = FastAPI(title="DeepSeek-OCR API", version="1.0")
 
 # Executor de threads — modelo é compartilhado entre threads
-executor = ThreadPoolExecutor(max_workers=4)
+executor = ThreadPoolExecutor(max_workers=os.cpu_count())
 
 
 # ---------------------------------------------------------------------
