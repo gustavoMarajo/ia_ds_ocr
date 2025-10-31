@@ -2,12 +2,11 @@ from fastapi import FastAPI, Form, UploadFile, File
 from transformers import AutoModel, AutoTokenizer
 from concurrent.futures import ThreadPoolExecutor
 from PIL import Image
-import torch, io, warnings, logging, os, asyncio, shutil, time, sqlite3, numpy as np, json, sys
 # from sklearn.metrics.pairwise import cosine_similarity
-
 from uuid import uuid4
 from glob import glob
 from contextlib import redirect_stdout, redirect_stderr
+import torch, io, warnings, logging, os, asyncio, shutil, time, sqlite3, numpy as np, json, sys
 
 # ---------------------------------------------------------------------
 # SUPRESSÃO DE WARNINGS E LOGS
@@ -26,8 +25,10 @@ DB_PATH = "./document_types.db"
 
 os.makedirs(BASE_TEMP_DIR, exist_ok=True)
 os.environ["PYTHONIOENCODING"] = "utf-8"
-sys.stdout.reconfigure(encoding='utf-8')
-sys.stderr.reconfigure(encoding='utf-8')
+devnull = open(os.devnull, "w", encoding="utf-8", buffering=1)
+sys.stdout = devnull
+sys.stderr = devnull
+
 
 print("Carregando modelo na inicialização...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
