@@ -1,8 +1,10 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, Form, UploadFile, File
 from transformers import AutoModel, AutoTokenizer
 from concurrent.futures import ThreadPoolExecutor
 from PIL import Image
-import torch, io, warnings, logging, os, asyncio, shutil, time
+import torch, io, warnings, logging, os, asyncio, shutil, time, sqlite3, numpy as np, json, sys
+# from sklearn.metrics.pairwise import cosine_similarity
+
 from uuid import uuid4
 from glob import glob
 from contextlib import redirect_stdout, redirect_stderr
@@ -19,6 +21,13 @@ logging.getLogger("torch").setLevel(logging.ERROR)
 # ---------------------------------------------------------------------
 MODEL_NAME = "deepseek-ai/DeepSeek-OCR"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+BASE_TEMP_DIR = "./temp_outputs"
+DB_PATH = "./document_types.db"
+
+os.makedirs(BASE_TEMP_DIR, exist_ok=True)
+os.environ["PYTHONIOENCODING"] = "utf-8"
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
 
 print("🔹 Carregando modelo na inicialização...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
@@ -28,10 +37,7 @@ model = model.eval().to(torch.bfloat16 if DEVICE == "cuda" else torch.float32).t
 app = FastAPI(title="DeepSeek-OCR API", version="1.0")
 
 # Executor de threads — modelo é compartilhado entre threads
-executor = ThreadPoolExecutor(max_workers=10)
-
-BASE_TEMP_DIR = "./temp_outputs"
-os.makedirs(BASE_TEMP_DIR, exist_ok=True)
+executor = ThreadPoolExecutor(max_workers=4)
 
 
 # ---------------------------------------------------------------------
@@ -81,6 +87,70 @@ def run_ocr(image_bytes: bytes) -> str:
 
 
 # ---------------------------------------------------------------------
+# FUNÇÕES AUXILIARES DE BANCO DE DADOS (SQLite)
+# ---------------------------------------------------------------------
+def init_db():
+    """Cria tabela se não existir"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS document_embeddings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tipo TEXT NOT NULL,
+            embedding TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def save_embedding(tipo: str, embedding: np.ndarray):
+    """Salva embedding e tipo no banco"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    emb_json = json.dumps(embedding.tolist())
+    c.execute("INSERT INTO document_embeddings (tipo, embedding) VALUES (?, ?)", (tipo, emb_json))
+    conn.commit()
+    conn.close()
+
+def load_all_embeddings():
+    """Carrega todos embeddings e tipos"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT tipo, embedding FROM document_embeddings")
+    rows = c.fetchall()
+    conn.close()
+    tipos = []
+    embeddings = []
+    for tipo, emb_json in rows:
+        tipos.append(tipo)
+        embeddings.append(np.array(json.loads(emb_json)))
+    return tipos, np.array(embeddings) if embeddings else ([], np.empty((0, 1)))
+
+
+# ---------------------------------------------------------------------
+# FUNÇÃO PARA EXTRAIR EMBEDDING DE UMA IMAGEM (SEM OCR)
+# ---------------------------------------------------------------------
+def extract_image_embedding(image_bytes: bytes) -> np.ndarray:
+    """Extrai vetor de características (embedding) da imagem"""
+    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+
+    # O método infer do modelo faz OCR, então usamos encode visual
+    # Para DeepSeek-OCR, o visual encoder fica dentro do modelo principal
+    with torch.no_grad():
+        if hasattr(model, "get_image_features"):
+            inputs = tokenizer(images=image, text="<image>\n", return_tensors="pt").to(DEVICE)
+            emb = model.get_image_features(**inputs)
+        else:
+            # fallback simples
+            inputs = tokenizer(images=image, text="<image>\n", return_tensors="pt").to(DEVICE)
+            outputs = model(**inputs)
+            emb = outputs.last_hidden_state.mean(dim=1)
+
+        emb = emb.detach().cpu().numpy().flatten()
+    return emb
+
+
+# ---------------------------------------------------------------------
 # ENDPOINT POST /ocr
 # ---------------------------------------------------------------------
 @app.post("/ocr")
@@ -89,3 +159,30 @@ async def ocr_endpoint(file: UploadFile = File(...)):
     loop = asyncio.get_running_loop()
     text = await loop.run_in_executor(executor, run_ocr, image_bytes)
     return {"filename": file.filename, "text": text}
+
+# ---------------------------------------------------------------------
+# ENDPOINTs POST /treinamento e /predição de tipo de documento
+# ---------------------------------------------------------------------
+# @app.post("/train-document-type")
+# async def train_document_type(file: UploadFile = File(...), tipo: str = Form(...)):
+#     image_bytes = await file.read()
+#     emb = extract_image_embedding(image_bytes)
+#     save_embedding(tipo, emb)
+#     return {"status": "ok", "message": f"Documento de tipo '{tipo}' treinado com sucesso."}
+
+
+# @app.post("/predict-document-type")
+# async def predict_document_type(file: UploadFile = File(...)):
+#     image_bytes = await file.read()
+#     emb = extract_image_embedding(image_bytes)
+
+#     tipos, banco = load_all_embeddings()
+#     if not tipos:
+#         return {"error": "Nenhum documento treinado ainda."}
+
+#     sims = cosine_similarity([emb], banco)
+#     idx = int(np.argmax(sims))
+#     return {
+#         "tipo_predito": tipos[idx],
+#         "similaridade": float(sims[0][idx])
+#     }
